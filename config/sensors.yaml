@@ -1,0 +1,29 @@
+# Sensor configuration for the L2 demonstration.
+#
+# These are starting values, not answers. The mounting positions are NOT here
+# on purpose: the node derives them from the ego vehicle's own bounding box,
+# because every blueprint is a different size and copied numbers put sensors
+# inside bodywork.
+carla_bridge:
+  ros__parameters:
+    host: "localhost"
+    port: 2000
+    timeout: 20.0
+
+    # empty keeps whatever map is loaded; "Town03" is the one used in class
+    town: ""
+
+    # 20 Hz simulation step. Larger and the physics gets coarse; smaller and
+    # the server cannot keep up with the sensor load.
+    delta: 0.05
+
+    vehicle: "vehicle.tesla.model3"
+    autopilot: true
+
+    image_width: 1280
+    image_height: 720
+    camera_fov: 90.0
+
+    lidar_channels: 32
+    lidar_range: 50.0
+    lidar_points_per_second: 300000
