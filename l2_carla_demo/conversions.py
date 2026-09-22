@@ -20,6 +20,20 @@ from sensor_msgs.msg import Imu, NavSatFix, NavSatStatus, PointCloud2, PointFiel
 from std_msgs.msg import Header
 
 
+## AI Generated code : Semantic Segmentation Color Palette
+# Define the CityScapes Color Map  (IDs 0 to 22)
+SEMANTIC_COLOR_PALETTE = np.array([
+    [  0,   0,   0, 255],  # 0: Unlabeled (Black)
+    [ 70,  70,  70, 255],  # 1: Building,  # 2: Fence
+    [ 55,  90,  80, 255],  # 3: Other,  # 4: Pedestrian,  # 5: Pole,  # 6: Road line,  # 7: Road,  # 8: Sidewalk,  # 9: Vegetation
+    [  0,   0, 142, 255],  # 10: Vehicle,  # 11: Wall,  # 12: Traffic sign
+    [ 70, 130, 180, 255],  # 13: Sky
+    [ 81,   0,  81, 255],  # 14: Ground,  # 15: Bridge,  # 16: Rail track,  # 17: Guard rail,  # 18: Traffic light,  # 19: Static,  # 20: Dynamic
+    [ 45,  60, 150, 255],  # 21: Water
+    [145, 170, 100, 255]   # 22: Terrain
+], dtype=np.uint8)
+
+
 def carla_to_ros_point(x: float, y: float, z: float) -> tuple[float, float, float]:
     """One point, from CARLA's left-handed frame into ROS's right-handed one."""
     return x, -y, z
@@ -103,6 +117,35 @@ def image_to_msg(image, frame_id: str, msg_class):
     msg.is_bigendian = 0
     msg.step = 4 * image.width
     msg.data = bytes(image.raw_data)
+    return msg
+
+
+## AI Generated Code : Convert CARLA Semantic Segmentation image to a visible BGRA8 ROS message
+def semantic_image_to_msg(image, frame_id: str, msg_class):
+    """Converts a CARLA Semantic Segmentation image into a visible BGRA8 ROS message."""
+    msg = msg_class()
+    msg.header = header(frame_id, image.timestamp)
+    msg.height = image.height
+    msg.width = image.width
+    msg.encoding = "bgra8"
+    msg.is_bigendian = 0
+    msg.step = 4 * image.width
+
+    # Reshape the raw data into a 2D BGRA image array
+    raw_array = np.frombuffer(image.raw_data, dtype=np.uint8)
+    bgra_img = raw_array.reshape((image.height, image.width, 4))
+
+    # Extract the semantic tags from the Red channel (Index 2 in BGRA)
+    semantic_tags = bgra_img[:, :, 2]
+
+    # Prevent crashes by clipping out-of-bounds tags
+    semantic_tags = np.clip(semantic_tags, 0, len(SEMANTIC_COLOR_PALETTE) - 1)
+
+    # Map the IDs to human-readable colors
+    colored_img = SEMANTIC_COLOR_PALETTE[semantic_tags]
+
+    # Convert back to raw bytes for the ROS 2 message
+    msg.data = colored_img.tobytes()
     return msg
 
 

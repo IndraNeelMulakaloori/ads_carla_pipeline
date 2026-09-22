@@ -20,10 +20,10 @@ carla_bridge:
     vehicle: "vehicle.tesla.model3"
     autopilot: true
 
-    image_width: 1280
-    image_height: 720
+    image_width: 600
+    image_height: 400
     camera_fov: 90.0
 
-    lidar_channels: 32
+    lidar_channels: 10
     lidar_range: 50.0
-    lidar_points_per_second: 300000
+    lidar_points_per_second: 100000
