@@ -120,7 +120,9 @@ def image_to_msg(image, frame_id: str, msg_class):
     return msg
 
 
-## AI Generated Code : Convert CARLA Semantic Segmentation image to a visible BGRA8 ROS message
+## AI Generated Code : CARLA delivers semantic segmentation images in BGRA format, 
+# where the Red channel contains the semantic IDs. 
+# We will map these IDs to colors using the SEMANTIC_COLOR_PALETTE defined above.
 def semantic_image_to_msg(image, frame_id: str, msg_class):
     """Converts a CARLA Semantic Segmentation image into a visible BGRA8 ROS message."""
     msg = msg_class()
@@ -131,7 +133,9 @@ def semantic_image_to_msg(image, frame_id: str, msg_class):
     msg.is_bigendian = 0
     msg.step = 4 * image.width
 
-    # Reshape the raw data into a 2D BGRA image array
+
+    # CARLA returns data in flat format(image_height * image_width * 4)
+    #  we need to reshape it to (height, width, 4)
     raw_array = np.frombuffer(image.raw_data, dtype=np.uint8)
     bgra_img = raw_array.reshape((image.height, image.width, 4))
 
@@ -142,7 +146,7 @@ def semantic_image_to_msg(image, frame_id: str, msg_class):
     semantic_tags = np.clip(semantic_tags, 0, len(SEMANTIC_COLOR_PALETTE) - 1)
 
     # Map the IDs to human-readable colors
-    colored_img = SEMANTIC_COLOR_PALETTE[semantic_tags]
+    colored_img = SEMANTIC_COLOR_PALETTE[semantic_tags].astype(np.uint8)
 
     # Convert back to raw bytes for the ROS 2 message
     msg.data = colored_img.tobytes()
