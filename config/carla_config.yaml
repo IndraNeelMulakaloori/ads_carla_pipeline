@@ -1,0 +1,135 @@
+sensor_manager:
+  ros__parameters:
+
+    # --- CARLA connection -------------------------------------------------
+    host: "localhost"
+    port: 2000
+    timeout_s: 10.0
+
+    # --- Simulation -------------------------------------------------------
+    # Synchronous mode is not optional. Without it the sensor streams arrive
+    # at irregular times, two runs disagree, and Task 5 has no way to pair a
+    # camera frame with a LiDAR sweep from the same instant.
+    synchronous_mode: true
+    fixed_delta_seconds: 0.05          # 20 Hz
+
+    # --- World ------------------------------------------------------------
+    # Load the map explicitly. spawn_index is an index into
+    # world.get_map().get_spawn_points(), and that list is different on
+    # every map, so the index means nothing without the town.
+    town: "Town01"
+
+    # --- Ego vehicle ------------------------------------------------------
+    vehicle_blueprint: "vehicle.tesla.model3"   
+    spawn_index:  25                            
+    autopilot: false                            
+    traffic_manager_port: 8000
+
+    # --- Mount transforms, metres and degrees -----------------------------
+    # These feed both the CARLA spawn and the static TF tree, so the two
+    # cannot disagree. Each key is that sensor's TF child frame, under the
+    # parent frame 'ego_vehicle', and is the frame_id on its messages.
+    mounts:
+      camera_rgb_front:
+        x: 1.5
+        y: 0.0
+        z: 1.6
+        roll: 0.0
+        pitch: 0.0
+        yaw: 0.0
+      # Depth and semantic cameras share the RGB mount so the three images
+      # are pixel-aligned. Keep them identical to camera_rgb_front.
+      camera_depth_front:
+        x: 1.5
+        y: 0.0
+        z: 1.6
+        roll: 0.0
+        pitch: 0.0
+        yaw: 0.0
+      camera_semseg_front:
+        x: 1.5
+        y: 0.0
+        z: 1.6
+        roll: 0.0
+        pitch: 0.0
+        yaw: 0.0
+      lidar_top:
+        x: 0.0
+        y: 0.0
+        z: 2.8
+        roll: 0.0
+        pitch: 0.0
+        yaw: 0.0
+      radar_front:
+        x: 2.2
+        y: 0.0
+        z: 0.8
+        roll: 0.0
+        pitch: 0.0
+        yaw: 0.0
+      gnss_link:
+        x: 0.0
+        y: 0.0
+        z: 2.8
+        roll: 0.0
+        pitch: 0.0
+        yaw: 0.0
+      imu_link:
+        x: 0.0
+        y: 0.0
+        z: 1.0
+        roll: 0.0
+        pitch: 0.0
+        yaw: 0.0
+
+    # --- Sensor attributes ------------------------------------------------
+    camera:
+      width: 1280
+      height: 720
+      fov: 90.0
+      sensor_tick: 0.05
+
+    depth_camera:
+      width: 1280
+      height: 720
+      fov: 90.0
+      sensor_tick: 0.05
+
+    semseg_camera:
+      width: 1280
+      height: 720
+      fov: 90.0
+      sensor_tick: 0.05
+
+    lidar:
+      channels: 32
+      range: 100.0
+      points_per_second: 560000
+      rotation_frequency: 20.0
+      upper_fov: 10.0
+      lower_fov: -30.0
+      sensor_tick: 0.05
+
+    radar:
+      horizontal_fov: 30.0
+      vertical_fov: 10.0
+      range: 100.0
+      points_per_second: 1500
+      sensor_tick: 0.05
+
+    gnss:
+      noise_lat_stddev: 0.000005
+      noise_lon_stddev: 0.000005
+      noise_alt_stddev: 0.05
+      sensor_tick: 0.1
+
+    imu:
+      noise_accel_stddev_x: 0.05
+      noise_accel_stddev_y: 0.05
+      noise_accel_stddev_z: 0.05
+      noise_gyro_stddev_x: 0.001
+      noise_gyro_stddev_y: 0.001
+      noise_gyro_stddev_z: 0.001
+      # A sensor_tick shorter than fixed_delta_seconds is clamped to one
+      # measurement per tick, so 0.01 here would still deliver 20 Hz.
+      sensor_tick: 0.05

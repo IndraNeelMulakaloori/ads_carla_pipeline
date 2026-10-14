@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+.mypy_cache/
+.pytest_cache/
+
+# Editors
+.vscode/
+.idea/
+
+# colcon / ROS 2 (if a workspace is created inside the repo)
+build/
+devel/
+install/
+log/
+
+
+# Bags and generated results
+*.db3
+*.mcap
+data/
+
+# Log files
+*.log
+*.gv
+
+#Misc
+CHARTER.pdf
+GP1_Peer_Review.txt
