@@ -30,16 +30,23 @@ sensor_manager:
     # cannot disagree. Each key is that sensor's TF child frame, under the
     # parent frame 'ego_vehicle', and is the frame_id on its messages.
     mounts:
-      camera_rgb_front:
+      camera_rgb_left_link:
         x: 1.5
-        y: 0.0
+        y: -0.25
         z: 1.6
         roll: 0.0
         pitch: 0.0
         yaw: 0.0
-      # Depth and semantic cameras share the RGB mount so the three images
-      # are pixel-aligned. Keep them identical to camera_rgb_front.
-      camera_depth_front:
+      camera_rgb_right_link:
+        x: 1.5
+        y: 0.25
+        z: 1.6
+        roll: 0.0
+        pitch: 0.0
+        yaw: 0.0
+# Depth and semantic cameras share the RGB mount so the three images
+      # are pixel-aligned. Keep them identical to camera_rgb_left_link.
+      camera_depth_link:
         x: 1.5
         y: 0.0
         z: 1.6

@@ -11,7 +11,7 @@ from l2_carla_demo.conversions import (
 # sensors to the ego vehicle, and publishing the image data streams.
 
 
-def _attach_rgb_camera(node, world, blueprints, vehicle, actors_list, msg_type, publisher):
+def _attach_rgb_camera(node, world, blueprints, vehicle, actors_list, msg_type, publisher,mount_name='camera_rgb_front'):
         """
         Attach RGB camera sensor attributes and mount values 
         """
@@ -34,7 +34,7 @@ def _attach_rgb_camera(node, world, blueprints, vehicle, actors_list, msg_type, 
 
 
         ## RGB Camera Mounts
-        rgb_mount = node.get_parameters_by_prefix('mounts.camera_rgb_front')
+        rgb_mount = node.get_parameters_by_prefix(f'mounts.{mount_name}')
         mount = carla.Transform(
             carla.Location(x=rgb_mount['x'].value,y= rgb_mount['y'].value, z=rgb_mount['z'].value),
             carla.Rotation(roll=rgb_mount['roll'].value, pitch=rgb_mount['pitch'].value,yaw=rgb_mount['yaw'].value))
@@ -54,7 +54,7 @@ def _attach_rgb_camera(node, world, blueprints, vehicle, actors_list, msg_type, 
                 callback. Task 3's timing analysis is meaningless otherwise.
                 """
                 publisher.publish(
-                    image_to_msg(measurement, 'camera_rgb_front', msg_type))
+                    image_to_msg(measurement, mount_name, msg_type))
                 
         sensor.listen(_rgb_callback)
         actors_list.append(sensor)

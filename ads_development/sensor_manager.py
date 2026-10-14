@@ -60,11 +60,9 @@ class SensorManager(Node):
         self.declare_parameter('autopilot', False)
         # Mount declarations
         self.mount_sensors = [
-            'camera_rgb_front',
-            'camera_depth_front',
-            'camera_semseg_front',
+            'camera_rgb_left_link',
+            'camera_rgb_right_link',
             'lidar_top',
-            'radar_front',
             'gnss_link',
             'imu_link',
         ]
@@ -188,8 +186,16 @@ class SensorManager(Node):
         # ------------------------------------------------------------------
         # Publishers. One per stream, on the topics the launch file expects.
         # ------------------------------------------------------------------
-        self.pub_rgb = self.create_publisher(
-            msg_type=Image, topic='/carla/camera/rgb/image', qos_profile=0)
+       
+        self.pub_rgb_left = self.create_publisher(
+            msg_type=Image, topic='/carla/camera/rgb/left/image', qos_profile=10)
+        self.pub_rgb_right = self.create_publisher(
+            msg_type=Image, topic='/carla/camera/rgb/right/image', qos_profile=10)
+
+        # self.pub_left_info = self.create_publisher(
+        #         CameraInfo, '/carla/stereo/left/camera_info', 1)
+        # self.pub_right_info = self.create_publisher(
+        #         CameraInfo, '/carla/stereo/right/camera_info', 1)
         self.pub_lidar = self.create_publisher(
             msg_type=PointCloud2, topic='/carla/lidar/points', qos_profile=10)
         self.pub_gnss = self.create_publisher(
@@ -293,8 +299,20 @@ class SensorManager(Node):
             vehicle=self.vehicle,
             actors_list=self.actors,
             msg_type=Image,
-            publisher=self.pub_rgb
-        )
+            publisher=self.pub_rgb_left,
+            mount_name=self.mount_sensors[0]
+        ),
+
+        _attach_rgb_camera(
+                    node=self,
+                    world=self.world,
+                    blueprints=self.blueprints,
+                    vehicle=self.vehicle,
+                    actors_list=self.actors,
+                    msg_type=Image,
+                    publisher=self.pub_rgb_right,
+                    mount_name=self.mount_sensors[1]
+                )
         
         _attach_lidar(
             node=self,
