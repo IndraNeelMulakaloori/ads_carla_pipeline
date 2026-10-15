@@ -26,7 +26,7 @@ def stereo_math_helper(left_img_array, right_img_array, baseline, focal_length, 
         speckleRange=32          # Max disparity variation within a speckle
     )
 
-    # 3. Compute the Disparity Map
+    # Compute the Disparity Map
     raw_disparity = stereo.compute(left_img_grayscale, right_img_grayscale)
 
     # 

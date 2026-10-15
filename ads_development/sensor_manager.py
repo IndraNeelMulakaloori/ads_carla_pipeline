@@ -21,6 +21,7 @@ from tf2_ros import StaticTransformBroadcaster
 from l2_carla_demo.conversions import (
     camera_info_msg,
     transform_from_carla,
+    ros_optical_transform
 )
 from .sensor_groups.cameras import (
     _attach_rgb_camera,
@@ -246,7 +247,7 @@ class SensorManager(Node):
         self.traffic_manager = self.client.get_trafficmanager(tm_port)
         self.traffic_manager.set_synchronous_mode(True)
         self.vehicle.set_autopilot(True, tm_port)
-        # self.traffic_manager.ignore_lights_percentage(self.vehicle, 100) # debugging param
+        self.traffic_manager.ignore_lights_percentage(self.vehicle, 100) # debugging param
         self.get_logger().info(
             f'Autopilot enabled (Traffic Manager port {tm_port}).')
 
@@ -280,12 +281,18 @@ class SensorManager(Node):
         # For every sensor in the yaml file,
         # it converts the CARLA convetion (left handed) to ros2 convention
         # and published as a tf2 transform
+        transforms = [
+                        transform_from_carla(self._mount(
+                            sensor), EGO_FRAME, sensor, now)
+                        for sensor in self.mount_sensors
+                    ]
+        optical_transforms = ros_optical_transform('camera_rgb_left_link', 'camera_rgb_left_optical', now)
+
+        transforms.append(optical_transforms)
         self.tf_static.sendTransform(
-            [
-                transform_from_carla(self._mount(
-                    sensor), EGO_FRAME, sensor, now)
-                for sensor in self.mount_sensors
-            ])
+            transforms
+            )
+        
         self.get_logger().info(f"Brodcasting Static TF Frames...")
 
     # ----------------------------------------------------------------------

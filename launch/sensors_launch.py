@@ -23,7 +23,7 @@ def generate_launch_description():
         'config', default_value=default_config,
         description='Path to the sensor configuration YAML.')
     autopilot_arg = DeclareLaunchArgument(
-        'autopilot', default_value='false',
+        'autopilot', default_value='true',
         description='Let CARLA drive the ego vehicle. '
                     'Your node must declare the autopilot parameter.')
 
@@ -41,4 +41,4 @@ def generate_launch_description():
         ],
     )
 
-    return LaunchDescription([config_arg, autopilot_arg, sensor_manager])
+    return LaunchDescription([config_arg, sensor_manager,autopilot_arg])
