@@ -31,6 +31,7 @@ setup(
     entry_points={
         'console_scripts': [
             'sensor_manager = ads_development.sensor_manager:main',
+            'stereo_camera =  ads_development.stereo_camera:main'
         ],
     },
 )

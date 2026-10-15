@@ -1,4 +1,5 @@
 import carla
+import math
 
 from l2_carla_demo.conversions import (
     image_to_msg,
@@ -9,7 +10,6 @@ from l2_carla_demo.conversions import (
 # Helper script containing modular setup functions and ROS 2 callbacks for the 
 # RGB, Depth, and Semantic Segmentation cameras. Handles spawning, attaching 
 # sensors to the ego vehicle, and publishing the image data streams.
-
 
 def _attach_rgb_camera(node, world, blueprints, vehicle, actors_list, msg_type, publisher,mount_name='camera_rgb_front'):
         """
