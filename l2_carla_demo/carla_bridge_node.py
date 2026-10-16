@@ -28,6 +28,7 @@ from rclpy.qos import QoSDurabilityPolicy, QoSProfile, QoSReliabilityPolicy
 from geometry_msgs.msg import TransformStamped
 from sensor_msgs.msg import CameraInfo, Image, Imu, NavSatFix, PointCloud2
 from tf2_ros import StaticTransformBroadcaster, TransformBroadcaster
+from visualization_msgs.msg import Marker
 
 import carla
 
@@ -63,6 +64,7 @@ class CarlaBridge(Node):
         self.declare_parameter("lidar_channels", 32)
         self.declare_parameter("lidar_range", 50.0)
         self.declare_parameter("lidar_points_per_second", 300000)
+        self.declare_parameter("gnss_noise_m", 0.0)  # std dev per axis; 0: CARLA's default
 
         self.delta = self.get_parameter("delta").value
         self.camera_fov = self.get_parameter("camera_fov").value
@@ -130,6 +132,9 @@ class CarlaBridge(Node):
             Imu, "/carla/ego_vehicle/imu", sensor_qos)
         self.pub_gnss = self.create_publisher(
             NavSatFix, "/carla/ego_vehicle/gnss", sensor_qos)
+        # The AV's body for RViz, sent once: it moves with its frame.
+        self.pub_marker = self.create_publisher(
+            Marker, "/carla/ego_vehicle/marker", latched)
 
         self.tf_broadcaster = TransformBroadcaster(self)
         self.static_tf_broadcaster = StaticTransformBroadcaster(self)
@@ -169,8 +174,17 @@ class CarlaBridge(Node):
         if self.vehicle is None:
             raise SystemExit("every spawn point on this map is occupied")
         self.actors.append(self.vehicle)
+        self.traffic_manager = None
         if self.get_parameter("autopilot").value:
-            self.vehicle.set_autopilot(True)
+            # The autopilot is CARLA's Traffic Manager. With the world in
+            # synchronous mode, the Traffic Manager must be synchronous too, or
+            # it may never issue a command: the vehicle then sits at its spawn
+            # point with autopilot "on". Seen here in 2 of 3 runs before this.
+            self.traffic_manager = self.client.get_trafficmanager()
+            self.traffic_manager.set_synchronous_mode(True)
+            # Tick once first: before it, the TM may never move the new vehicle.
+            self.world.tick()
+            self.vehicle.set_autopilot(True, self.traffic_manager.get_port())
 
         self.mounts = self._mounts(self.vehicle)
         # Rigid, always. SpringArm smooths the sensor's motion for video, which
@@ -223,7 +237,28 @@ class CarlaBridge(Node):
         imu.listen(self._on_imu)
         self.actors.append(imu)
 
-        gnss = self.world.spawn_actor(bp_lib.find("sensor.other.gnss"),
+        gnss_bp = bp_lib.find("sensor.other.gnss")
+        noise_m = float(self.get_parameter("gnss_noise_m").value)
+        if noise_m > 0.0:
+            # CARLA adds the noise to latitude and longitude in DEGREES and to
+            # altitude in meters (GnssSensor.cpp, 0.9.16). Meters to degrees
+            # comes from the map's own geolocation, the one the GNSS uses: the
+            # change in latitude over 100 m of CARLA y, in longitude over 100 m
+            # of CARLA x, measured at the spawn point.
+            m = self.world.get_map()
+            p = self.vehicle.get_transform().location
+            g0 = m.transform_to_geolocation(p)
+            gy = m.transform_to_geolocation(carla.Location(p.x, p.y + 100.0, p.z))
+            gx = m.transform_to_geolocation(carla.Location(p.x + 100.0, p.y, p.z))
+            lat_per_m = abs(gy.latitude - g0.latitude) / 100.0
+            lon_per_m = abs(gx.longitude - g0.longitude) / 100.0
+            gnss_bp.set_attribute("noise_lat_stddev", str(noise_m * lat_per_m))
+            gnss_bp.set_attribute("noise_lon_stddev", str(noise_m * lon_per_m))
+            gnss_bp.set_attribute("noise_alt_stddev", str(noise_m))
+            self.get_logger().info(
+                f"GNSS noise {noise_m:.2f} m per axis: {noise_m * lat_per_m:.3e} deg "
+                f"of latitude, {noise_m * lon_per_m:.3e} deg of longitude")
+        gnss = self.world.spawn_actor(gnss_bp,
                                       self.mounts["gnss"],
                                       attach_to=self.vehicle,
                                       attachment_type=rigid)
@@ -270,6 +305,31 @@ class CarlaBridge(Node):
         static.append(optical)
 
         self.static_tf_broadcaster.sendTransform(static)
+        self._publish_marker()
+
+    def _publish_marker(self) -> None:
+        """The AV's body in RViz: its own bounding box, in its own frame.
+
+        bounding_box.location is the box's center relative to the vehicle's
+        origin, the ego_vehicle frame; extent is half the size. frame_locked
+        makes RViz move the box with ego_vehicle, so one message is enough.
+        """
+        bb = self.vehicle.bounding_box
+        m = Marker()
+        m.header.frame_id = EGO_FRAME          # stamp 0: the latest transform
+        m.ns, m.id = "ego", 0
+        m.type, m.action = Marker.CUBE, Marker.ADD
+        m.frame_locked = True
+        x, y, z = conv.carla_to_ros_point(bb.location.x, bb.location.y, bb.location.z)
+        m.pose.position.x, m.pose.position.y, m.pose.position.z = x, y, z
+        m.pose.orientation.w = 1.0
+        m.scale.x, m.scale.y, m.scale.z = 2 * bb.extent.x, 2 * bb.extent.y, 2 * bb.extent.z
+        m.color.r = m.color.g = m.color.b = 0.95
+        m.color.a = 0.6
+        self.pub_marker.publish(m)
+        self.get_logger().info(
+            f"AV body {m.scale.x:.2f} x {m.scale.y:.2f} x {m.scale.z:.2f} m, "
+            f"center ({x:.2f}, {y:.2f}, {z:.2f}) in {EGO_FRAME}")
 
     # -------------------------------------------------------------- callbacks
     def _on_image(self, image) -> None:
@@ -319,6 +379,8 @@ class CarlaBridge(Node):
                 [carla.command.DestroyActor(a) for a in reversed(self.actors)])
             self.get_logger().info(f"destroyed {len(self.actors)} actors")
             self.actors.clear()
+        if self.traffic_manager is not None:
+            self.traffic_manager.set_synchronous_mode(False)
         if self.original_settings is not None:
             self.world.apply_settings(self.original_settings)
 
