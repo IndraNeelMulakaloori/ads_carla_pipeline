@@ -69,7 +69,7 @@ class StereoCamera(Node):
         b = colors_3d[:, 2].astype(np.uint32)
         rgb_packed = (r << 16) | (g << 8) | b
         # Pack into a sensor_msgs/PointCloud2 message
-        #         (Ensure header.frame_id = 'camera_rgb_left_optical')
+       
         # Stack X, Y, Z, and the packed RGB into an (N, 4) array
         cloud_data = np.column_stack((points_3d, rgb_packed.view(np.float32)))
         
@@ -83,14 +83,14 @@ class StereoCamera(Node):
         
         # Inherit the exact simulation timestamp from the camera
         header = left_msg.header
-        header.frame_id = 'camera_rgb_left_optical'
+        header.frame_id = 'camera_rgb_left_optical'  #         (Ensure header.frame_id = 'camera_rgb_left_optical')
         
         # Build the message using the standard ROS 2 Python library
         cloud_msg = point_cloud2.create_cloud(header, fields, cloud_data)
 
-        # 4. Publish point cloud
+        # ublish point cloud
         self.pub_cloud.publish(cloud_msg)
-        # Publish point cloud
+
         
     def camera_intrinsics(self) -> tuple[float, float, float]:
         """(f, cx, cy) in pixels for a CARLA RGB camera blueprint.

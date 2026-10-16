@@ -67,6 +67,7 @@ class SensorManager(Node):
             'gnss_link',
             'imu_link',
         ]
+        self.optical_links = ['camera_rgb_left_optical']
         axes = ['x', 'y', 'z', 'roll', 'pitch', 'yaw']
 
         for sensor in self.mount_sensors:
@@ -286,7 +287,7 @@ class SensorManager(Node):
                             sensor), EGO_FRAME, sensor, now)
                         for sensor in self.mount_sensors
                     ]
-        optical_transforms = ros_optical_transform('camera_rgb_left_link', 'camera_rgb_left_optical', now)
+        optical_transforms = ros_optical_transform(self.mount_sensors[0], self.optical_links[0], now)
 
         transforms.append(optical_transforms)
         self.tf_static.sendTransform(

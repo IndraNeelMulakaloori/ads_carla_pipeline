@@ -9,16 +9,18 @@ import os
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument
+from launch.actions import DeclareLaunchArgument, EmitEvent, RegisterEventHandler
+from launch.event_handlers import OnProcessExit
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 from launch_ros.parameter_descriptions import ParameterValue
-
+from launch.events import Shutdown
 
 def generate_launch_description():
     pkg_share = get_package_share_directory('ads_development')
     default_config = os.path.join(pkg_share, 'config', 'carla_config.yaml')
 
+    
     config_arg = DeclareLaunchArgument(
         'config', default_value=default_config,
         description='Path to the sensor configuration YAML.')
@@ -26,6 +28,17 @@ def generate_launch_description():
         'autopilot', default_value='true',
         description='Let CARLA drive the ego vehicle. '
                     'Your node must declare the autopilot parameter.')
+    ## Robot urdf
+    urdf_path = os.path.join(pkg_share, 'urdf', 'car.urdf')
+    with open(urdf_path, 'r') as f:
+        robot_description_config = f.read()
+
+    robot_state_publisher = Node(
+        package='robot_state_publisher',
+        executable='robot_state_publisher',
+        output='screen',
+        parameters=[{'robot_description': robot_description_config}]
+    )
 
     sensor_manager = Node(
         package='ads_development',
@@ -39,6 +52,21 @@ def generate_launch_description():
             {'autopilot': ParameterValue(LaunchConfiguration('autopilot'),
                                          value_type=bool)},
         ],
+        
     )
-
-    return LaunchDescription([config_arg, sensor_manager,autopilot_arg])
+    stereo_camera = Node(
+        package='ads_development',
+                executable='stereo_camera',
+                name='stereo_camera',
+                output='screen',
+                arguments=['--ros-args'],
+            )
+    shutdown_handler = RegisterEventHandler(
+        event_handler=OnProcessExit(
+            target_action=sensor_manager,
+            on_exit=[
+                EmitEvent(event=Shutdown(reason='Sensor manager stopped. Killing GPU pipeline.'))
+            ]
+        )
+    )
+    return LaunchDescription([config_arg, autopilot_arg, sensor_manager,robot_state_publisher])
