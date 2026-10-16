@@ -61,6 +61,9 @@ def header(frame_id: str, sim_time: float) -> Header:
     return h
 
 
+
+
+
 def quaternion_from_euler(roll: float, pitch: float, yaw: float) -> Quaternion:
     """Radians, ROS convention, ZYX order."""
     cy, sy = math.cos(yaw * 0.5), math.sin(yaw * 0.5)
@@ -72,6 +75,21 @@ def quaternion_from_euler(roll: float, pitch: float, yaw: float) -> Quaternion:
     q.y = cr * sp * cy + sr * cp * sy
     q.z = cr * cp * sy - sr * sp * cy
     return q
+
+
+def ros_optical_transform(parent: str, child: str, sim_time: float) -> TransformStamped:
+    """A pure ROS REP-103 optical frame transform using ZYX Euler angles."""
+    t = TransformStamped()
+    t.header = header(parent, sim_time)
+    t.child_frame_id = child
+    
+    # ROS optical frames require Roll = -90 deg, Pitch = 0 deg, Yaw = -90 deg
+    t.transform.rotation = quaternion_from_euler(
+        math.radians(-90.0), 
+        0.0, 
+        math.radians(-90.0)
+    )
+    return t
 
 
 def transform_from_carla(carla_transform, parent: str, child: str,
@@ -116,7 +134,7 @@ def image_to_msg(image, frame_id: str, msg_class):
     msg.encoding = "bgra8"
     msg.is_bigendian = 0
     msg.step = 4 * image.width
-    msg.data = bytes(image.raw_data)
+    msg.data = memoryview(image.raw_data)
     return msg
 
 
