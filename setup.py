@@ -22,7 +22,7 @@ setup(
     zip_safe=True,
     maintainer='neelmvss',
     maintainer_email='neelmvss@umd.edu',
-    description='TODO: Package description',
+    description='ROS 2 CARLA sensor suite and stereo point-cloud pipeline',
     license='Apache-2.0',
     extras_require={
         'test': [

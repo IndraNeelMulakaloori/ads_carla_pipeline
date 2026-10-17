@@ -15,6 +15,8 @@ from rclpy.node import Node
 from sensor_msgs.msg import Image, PointCloud2, NavSatFix, Imu
 from tf2_ros import StaticTransformBroadcaster
 
+
+# Note: Relies on the external CARLA-ROS conversion library by Zeid Kootbally.(https://github.com/rubixcubic/enpm818z-fall-2026-carla-ros/tree/main/l2_carla_demo)
 # CARLA-to-ROS conversions (buffer layouts, left- to right-handed axis flip,
 # timestamps) are imported from l2_carla_demo, the package behind the L2
 # lecture demo, rather than reimplemented here.

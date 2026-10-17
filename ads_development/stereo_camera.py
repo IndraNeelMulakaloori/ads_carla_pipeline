@@ -18,7 +18,11 @@ class StereoCamera(Node):
         self.declare_parameter('camera.width', 1280)
         self.declare_parameter('camera.height', 720)
         self.declare_parameter('camera.fov', 90.0)
-        self.baseline = 0.5
+        self.declare_parameter('mounts.camera_rgb_left_link.y', -0.25)
+        self.declare_parameter('mounts.camera_rgb_right_link.y', 0.25)
+        lcam_y = self.get_parameter('mounts.camera_rgb_left_link.y').value
+        rcam_y = self.get_parameter('mounts.camera_rgb_right_link.y').value
+        self.baseline = abs(lcam_y) + abs(rcam_y)  # meters
         self.f, self.cx, self.cy = self.camera_intrinsics()
         # Synchronized subscribers
         self.sub_left = message_filters.Subscriber(
@@ -27,7 +31,7 @@ class StereoCamera(Node):
         self.sub_right = message_filters.Subscriber(
             self, Image, "/carla/camera/rgb/right/image"
         )
-
+        self.get_logger().info(f"Subscribers initialized for left and right camera images.")
         self.sync = message_filters.ApproximateTimeSynchronizer(
             [self.sub_left, self.sub_right],
             queue_size=10,
@@ -39,7 +43,7 @@ class StereoCamera(Node):
         self.pub_cloud = self.create_publisher(
             PointCloud2, "/carla/stereo/points", 10
         )
-        self.get_logger().info(f"Stereo camera processing node initialized.\nfocal length : {self.f:.2f}\nwidth : {self.cx}\nheight : {self.cy}")
+        self.get_logger().info(f"Stereo camera processing node initialized.\nfocal length : {self.f:.2f}\nwidth : {self.cx}\nheight : {self.cy}\nbaseline : {self.baseline:.2f}")
 
     def stereo_callback(self, left_msg: Image, right_msg: Image):
         # Convert ROS Image messages to OpenCV / NumPy arrays
