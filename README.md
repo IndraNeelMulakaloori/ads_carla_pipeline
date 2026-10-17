@@ -116,7 +116,7 @@ The configured fixed frame is `ego_vehicle`. If the point cloud is not visible, 
 
 A special thanks to **Dr. Zeid Kootbally** for providing the foundations & starter code for this project. 
 
-This repository relies on his public [CARLA-ROS starter](https://github.com/rubixcubic/enpm818z-fall-2026-carla-ros) `l2_carla_Demo` package as an abstraction layer to convert datt between the **CARLA Simulator** and **ROS** and is licensed under Apache 2.0. 
+This repository relies on his public [CARLA-ROS starter](https://github.com/rubixcubic/enpm818z-fall-2026-carla-ros) `l2_carla_Demo` package as an abstraction layer to convert data between the **CARLA Simulator** and **ROS** and is licensed under Apache 2.0. 
 
 
 ## License
