@@ -8,7 +8,7 @@ def stereo_math_helper(left_img_array, right_img_array, baseline, focal_length, 
     left_img_grayscale = cv.cvtColor(left_img_array, cv.COLOR_RGB2GRAY)
     right_img_grayscale = cv.cvtColor(right_img_array, cv.COLOR_RGB2GRAY)
 
-    ### compute dosaprtiy 
+    ### compute disparity 
     block_size = 5  # Size of the matching window (must be odd). 5 or 7 is standard.
     
     stereo = cv.StereoSGBM_create(
@@ -41,7 +41,9 @@ def stereo_math_helper(left_img_array, right_img_array, baseline, focal_length, 
     # Create pixel coordinate grids (u = columns/width, v = rows/height)
     u, v = np.meshgrid(np.arange(w), np.arange(h))
 
-    # Safe Z calculation: only divide where disparity > 0
+    #### Filtering  
+    ### Safe Z calculation: only divide where disparity > 0
+
     valid_disp = disparity > 0
     Z_opt = np.zeros_like(disparity, dtype=np.float32)
     Z_opt[valid_disp] = (focal_length * baseline) / disparity[valid_disp]
@@ -50,7 +52,7 @@ def stereo_math_helper(left_img_array, right_img_array, baseline, focal_length, 
     X_opt = (u - cx) * Z_opt / focal_length
     Y_opt = (v - cy) * Z_opt / focal_length
 
-    #  Mask out bad geometry and limit physical range (e.g., 50 meters max)
+    ##  Mask out bad geometry and limit physical range (e.g., 50 meters max)
     valid_mask = (Z_opt > 0) & (Z_opt < 50.0)
 
     # Apply mask and stack into an (N, 3) point cloud array

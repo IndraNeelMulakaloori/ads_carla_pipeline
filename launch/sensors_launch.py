@@ -61,12 +61,5 @@ def generate_launch_description():
                 output='screen',
                 arguments=['--ros-args'],
             )
-    shutdown_handler = RegisterEventHandler(
-        event_handler=OnProcessExit(
-            target_action=sensor_manager,
-            on_exit=[
-                EmitEvent(event=Shutdown(reason='Sensor manager stopped. Killing GPU pipeline.'))
-            ]
-        )
-    )
+   
     return LaunchDescription([config_arg, autopilot_arg, sensor_manager,robot_state_publisher])

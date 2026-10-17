@@ -145,7 +145,7 @@ class SensorManager(Node):
             # would silently move your vehicle somewhere else.
             self.world = self.client.load_world(
                 self.get_parameter('town').value)
-
+            self.world.set_weather(carla.WeatherParameters.ClearNoon) # set weather to clear noon for better visibility
         except RuntimeError as exc:
             self.get_logger().error(
                 f'No CARLA server at {host}:{port} ({exc}). '
