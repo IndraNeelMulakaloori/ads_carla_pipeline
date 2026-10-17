@@ -37,6 +37,7 @@ cd ~/carla_ws/src
 git clone https://github.com/rubixcubic/enpm818z-fall-2026-carla-ros
 
 # Clone this repository
+git@github.com:IndraNeelMulakaloori/ads_carla_pipeline.git
 ```
 
 From the ROS 2 workspace root:
