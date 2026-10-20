@@ -1,8 +1,8 @@
 """Start sensor_manager with the team's YAML configuration.
 
-    ros2 launch ads_pipeline sensors_launch.py
-    ros2 launch ads_pipeline sensors_launch.py autopilot:=true
-    ros2 launch ads_pipeline sensors_launch.py config:=/path/to/other.yaml
+    ros2 launch stereo_vision sensors_launch.py
+    ros2 launch stereo_vision sensors_launch.py autopilot:=true
+    ros2 launch stereo_vision sensors_launch.py config:=/path/to/other.yaml
 """
 
 import os
@@ -17,7 +17,7 @@ from launch_ros.parameter_descriptions import ParameterValue
 from launch.events import Shutdown
 
 def generate_launch_description():
-    pkg_share = get_package_share_directory('ads_development')
+    pkg_share = get_package_share_directory('stereo_vision')
     default_config = os.path.join(pkg_share, 'config', 'carla_config.yaml')
 
     
@@ -41,7 +41,7 @@ def generate_launch_description():
     )
 
     sensor_manager = Node(
-        package='ads_development',
+        package='stereo_vision',
         executable='sensor_manager',
         name='sensor_manager',
         output='screen',
@@ -55,11 +55,11 @@ def generate_launch_description():
         
     )
     stereo_camera = Node(
-        package='ads_development',
+        package='stereo_vision',
                 executable='stereo_camera',
                 name='stereo_camera',
                 output='screen',
                 arguments=['--ros-args'],
             )
    
-    return LaunchDescription([config_arg, autopilot_arg, sensor_manager,robot_state_publisher])
+    return LaunchDescription([config_arg, autopilot_arg, sensor_manager, robot_state_publisher, stereo_camera])

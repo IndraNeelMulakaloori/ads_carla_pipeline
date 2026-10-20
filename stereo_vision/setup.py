@@ -3,7 +3,7 @@ import os
 
 from setuptools import find_packages, setup
 
-package_name = 'ads_development'
+package_name = 'stereo_vision'
 
 setup(
     name=package_name,
@@ -31,8 +31,8 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'sensor_manager = ads_development.sensor_manager:main',
-            'stereo_camera =  ads_development.stereo_camera:main'
+            'sensor_manager = stereo_vision.sensor_manager:main',
+            'stereo_camera =  stereo_vision.stereo_camera:main'
         ],
     },
 )
