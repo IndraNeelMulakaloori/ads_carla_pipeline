@@ -25,20 +25,7 @@ The current node uses a 0.5 m baseline and derives the focal length and principa
 - OpenCV, NumPy, and `message_filters` for stereo processing.
 
 The CARLA server and ROS 2 client must use compatible CARLA versions. Start the CARLA server before launching this package.
-## Prerequisites & Installation
 
-This package sits side-by-side with its dependencies in a standard ROS workspace. 
-
-```bash
-# Navigate to your workspace source directory
-cd ~/carla_ws/src
-
-# Clone the required conversion library dependency (Dr. Zeid Kootbally
-git clone https://github.com/rubixcubic/enpm818z-fall-2026-carla-ros
-
-# Clone this repository
-git@github.com:IndraNeelMulakaloori/ads_carla_pipeline.git
-```
 
 From the ROS 2 workspace root:
 
@@ -71,7 +58,7 @@ source install/setup.bash
 ros2 launch ads_development sensors_launch.py
 ```
 
-Autopilot is enabled by default in the launch file. To explicitly disable it, pass `autopilot:=false`. To use a different sensor YAML configuration, pass `config:=/absolute/path/to/config.yaml`.
+Autopilot is enabled by default in the launch file. To explicitly disable it, pass `autopilot:=false`. To use a different sensor YAML configuration, pass `config:=/absolute/path/to/stereo_vision/ads_development/config/carla_config.yaml`.
 
 ### 3. Start stereo processing
 
