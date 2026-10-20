@@ -62,4 +62,4 @@ def generate_launch_description():
                 arguments=['--ros-args'],
             )
    
-    return LaunchDescription([config_arg, autopilot_arg, sensor_manager, robot_state_publisher, stereo_camera])
+    return LaunchDescription([config_arg, autopilot_arg, sensor_manager, robot_state_publisher])
