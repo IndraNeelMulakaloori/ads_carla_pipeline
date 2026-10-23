@@ -130,6 +130,34 @@ The configured fixed frame is `ego_vehicle`. If the point cloud is not visible, 
 
 ![RViz2 view of the sensor suite and stereo point cloud](results/stereo_vision_rviz.png)
 
+## Stereo evaluation results
+
+The offline stereo evaluator was run over 332 frames and compared stereo depth with LiDAR depth projected into the camera image. The table reports the mean of the per-frame metrics; the complete per-frame results are available in [stereo_evaluation_metrics.csv](results/stereo_evaluation_metrics.csv).
+
+| Metric | Mean | Interpretation |
+| --- | ---: | --- |
+| Mean absolute error (MAE) | 4.16 m | Mean absolute depth error on pixels valid in both stereo and LiDAR depth maps |
+| Root mean square error (RMSE) | 11.82 m | Error measure that gives larger errors more weight, on the same shared valid pixels |
+| Stereo depth fill rate | 50.08% | Image pixels with a valid stereo depth estimate |
+| Valid comparisons | 1,680 pixels/frame | Pixels used for the per-frame MAE and RMSE calculations |
+| Depth computation latency | 142.83 ms/frame | Time spent computing stereo depth; excludes synchronization, LiDAR projection, and ROS publishing |
+| Depth computation throughput | 7.00 FPS | Derived from depth computation latency |
+
+These figures summarize this recorded CARLA run and are not a general performance guarantee. In particular, the fill rate counts valid stereo pixels across the image, while the accuracy metrics use only pixels where both stereo and projected LiDAR depth are valid.
+
+### Evaluation setup
+
+- **GPU:** NVIDIA GeForce RTX 3090 (reported hardware for this run).
+- **RGB cameras:** 1280 × 720 at 90° horizontal FOV.
+- **LiDAR:** 32 channels, 100 m range, 560,000 points/s, 20 Hz rotation, and vertical FOV from −30° to +10°.
+- **Simulation and sensor cadence:** synchronous simulation at 20 Hz (`fixed_delta_seconds: 0.05 s`); the RGB camera and LiDAR also use a 0.05 s sensor tick. This is the acquisition rate, not the stereo processing throughput shown above.
+
+These camera settings match the checked-in [CARLA configuration](stereo_vision/config/carla_config.yaml). The evaluator reads the image dimensions from this configuration.
+
+## Demo video
+
+[Watch the stereo vision demo on YouTube](https://youtu.be/ojKTuq8QztQ?si=pSBhg4NkagUkfBHe)
+
 ## Important configuration notes
 
 - The default sensor configuration lives in `stereo_vision/config/carla_config.yaml`
