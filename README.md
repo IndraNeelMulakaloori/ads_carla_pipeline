@@ -171,6 +171,7 @@ These camera settings match the checked-in [CARLA configuration](stereo_vision/c
 - [x] Publish synchronized RGB, LiDAR, GNSS, and IMU topics
 - [x] Generate a colored stereo point cloud
 - [ ] Port core logic to C++
+- [ ] Containerize using Docker
 - [ ] Benchmark against LiDAR ground truth
 - [ ] Add EKF-based estimation
 - [ ] Add 3D detection and tracking
