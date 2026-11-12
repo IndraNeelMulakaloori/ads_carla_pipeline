@@ -5,6 +5,10 @@ This workspace contains a ROS 2 CARLA integration and stereo-vision pipeline for
 - `l2_carla_demo`: CARLA-to-ROS message conversion utilities and the lecture demo bridge
 - `stereo_vision`: CARLA sensor spawning, TF setup, and stereo processing
 
+## Demo video
+
+[Watch the stereo vision demo on YouTube](https://youtu.be/ojKTuq8QztQ?si=pSBhg4NkagUkfBHe)
+
 ## Repository layout
 
 ```text
@@ -154,9 +158,6 @@ These figures summarize this recorded CARLA run and are not a general performanc
 
 These camera settings match the checked-in [CARLA configuration](stereo_vision/config/carla_config.yaml). The evaluator reads the image dimensions from this configuration.
 
-## Demo video
-
-[Watch the stereo vision demo on YouTube](https://youtu.be/ojKTuq8QztQ?si=pSBhg4NkagUkfBHe)
 
 ## Important configuration notes
 
